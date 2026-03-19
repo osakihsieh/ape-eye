@@ -24,18 +24,20 @@ const mockValidateUrl = validateUrl as jest.Mock;
 const mockTakeScreenshot = takeScreenshot as jest.Mock;
 const mockUploadScreenshot = uploadScreenshot as jest.Mock;
 
-function createMockRequest(body: unknown, query: Record<string, string> = {}): Partial<Request> {
-  return { body, query } as Partial<Request>;
+function createMockRequest(body: unknown, query: Record<string, string> = {}, method = "POST"): Partial<Request> {
+  return { body, query, method } as Partial<Request>;
 }
 
-function createMockResponse(): { res: Partial<Response>; statusMock: jest.Mock; jsonMock: jest.Mock } {
+function createMockResponse(): { res: Partial<Response>; statusMock: jest.Mock; jsonMock: jest.Mock; redirectMock: jest.Mock } {
   const jsonMock = jest.fn();
+  const redirectMock = jest.fn();
   const statusMock = jest.fn().mockReturnValue({ json: jsonMock });
   const res: Partial<Response> = {
     status: statusMock as unknown as Response["status"],
     json: jsonMock,
+    redirect: redirectMock as unknown as Response["redirect"],
   };
-  return { res, statusMock, jsonMock };
+  return { res, statusMock, jsonMock, redirectMock };
 }
 
 describe("screenshotHandler", () => {
@@ -60,21 +62,19 @@ describe("screenshotHandler", () => {
       });
     });
 
-    it("accepts URL from query string (GET request)", async () => {
+    it("GET request redirects to image URL instead of returning JSON", async () => {
       mockValidateUrl.mockReturnValue("https://example.com");
       mockTakeScreenshot.mockResolvedValue(Buffer.from("screenshot"));
       mockUploadScreenshot.mockResolvedValue("https://storage.googleapis.com/bucket/file.png");
 
-      const req = createMockRequest({}, { url: "https://example.com" });
-      const { res, jsonMock } = createMockResponse();
+      const req = createMockRequest({}, { url: "https://example.com" }, "GET");
+      const { res, jsonMock, redirectMock } = createMockResponse();
 
       await screenshotHandler(req as Request, res as Response);
 
       expect(mockValidateUrl).toHaveBeenCalledWith("https://example.com");
-      expect(jsonMock).toHaveBeenCalledWith({
-        success: true,
-        url: "https://storage.googleapis.com/bucket/file.png",
-      });
+      expect(redirectMock).toHaveBeenCalledWith(302, "https://storage.googleapis.com/bucket/file.png");
+      expect(jsonMock).not.toHaveBeenCalled();
     });
 
     it("query string takes precedence over body when both are present", async () => {

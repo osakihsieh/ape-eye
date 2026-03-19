@@ -12,6 +12,11 @@ export async function screenshotHandler(req: Request, res: Response): Promise<vo
     const screenshotBuffer = await takeScreenshot(url);
     const storageUrl = await uploadScreenshot(screenshotBuffer);
 
+    if (req.method === "GET") {
+      res.redirect(302, storageUrl);
+      return;
+    }
+
     const response: ScreenshotResponse = { success: true, url: storageUrl };
     res.json(response);
   } catch (error) {
