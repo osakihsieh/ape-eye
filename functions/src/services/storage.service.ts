@@ -22,6 +22,13 @@ export async function uploadScreenshot(buffer: Buffer): Promise<string> {
 
     await fileRef.save(buffer, { metadata: { contentType: "image/png" } });
 
+    if (process.env.FIREBASE_STORAGE_EMULATOR_HOST) {
+      await fileRef.makePublic();
+      const emulatorHost = process.env.FIREBASE_STORAGE_EMULATOR_HOST;
+      const encodedPath = encodeURIComponent(fileName);
+      return `http://${emulatorHost}/v0/b/${bucket.name}/o/${encodedPath}?alt=media`;
+    }
+
     const expiryDate = new Date(Date.now() + SIGNED_URL_EXPIRY_MS);
     const [signedUrl] = await fileRef.getSignedUrl({
       action: "read",
