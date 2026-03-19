@@ -13,11 +13,11 @@ jest.mock("puppeteer-core", () => ({
 
 jest.mock("../../src/config/browser.config", () => ({
   getChromiumExecutablePath: jest.fn().mockResolvedValue("/usr/bin/chromium"),
-  BROWSER_LAUNCH_OPTIONS: {
+  buildLaunchOptions: jest.fn().mockReturnValue({
     args: [],
     defaultViewport: { width: 1280, height: 800 },
     headless: true,
-  },
+  }),
 }));
 
 jest.mock("firebase-admin", () => ({
@@ -69,6 +69,12 @@ describe("Screenshot handler integration", () => {
       goto: jest.fn().mockResolvedValue(undefined),
       screenshot: jest.fn().mockResolvedValue(Buffer.from("fake-screenshot")),
       close: jest.fn().mockResolvedValue(undefined),
+      evaluate: jest.fn()
+        .mockResolvedValueOnce(800)
+        .mockResolvedValueOnce(800)
+        .mockResolvedValueOnce(800)
+        .mockResolvedValueOnce(800)
+        .mockResolvedValue(undefined),
     };
 
     const mockBrowser = {
