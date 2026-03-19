@@ -1,0 +1,9 @@
+export const SCREENSHOT_TIMEOUT_MS = 30_000;
+export const NAVIGATION_TIMEOUT_MS = 20_000;
+export const VIEWPORT_WIDTH = 1280;
+export const VIEWPORT_HEIGHT = 800;
+export const SIGNED_URL_EXPIRY_DAYS = 7;
+export const SIGNED_URL_EXPIRY_MS = SIGNED_URL_EXPIRY_DAYS * 24 * 60 * 60 * 1000;
+export const STORAGE_FOLDER = "screenshots";
+export const MAX_URL_LENGTH = 2048;
+export const ALLOWED_URL_SCHEMES = ["http:", "https:"] as const;
