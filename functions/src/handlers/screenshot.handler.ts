@@ -7,7 +7,8 @@ import type { ScreenshotResponse } from "../types/screenshot.types";
 
 export async function screenshotHandler(req: Request, res: Response): Promise<void> {
   try {
-    const url = validateUrl(req.body?.url);
+    const rawUrl = (req.query?.url as string | undefined) ?? req.body?.url;
+    const url = validateUrl(rawUrl);
     const screenshotBuffer = await takeScreenshot(url);
     const storageUrl = await uploadScreenshot(screenshotBuffer);
 
