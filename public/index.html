@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ape Eye — 網頁截圖工具</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #0f1117;
+      color: #e2e8f0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      padding: 1rem;
+    }
+
+    .card {
+      width: 100%;
+      max-width: 560px;
+      background: #1a1d27;
+      border: 1px solid #2d3148;
+      border-radius: 16px;
+      padding: 2.5rem 2rem;
+    }
+
+    .logo {
+      font-size: 2rem;
+      margin-bottom: 0.25rem;
+    }
+
+    h1 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 0.4rem;
+    }
+
+    .subtitle {
+      color: #94a3b8;
+      font-size: 0.9rem;
+      margin-bottom: 2rem;
+    }
+
+    label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.5rem;
+    }
+
+    .input-row {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    input[type="url"] {
+      flex: 1;
+      padding: 0.65rem 1rem;
+      background: #0f1117;
+      border: 1px solid #2d3148;
+      border-radius: 8px;
+      color: #e2e8f0;
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    input[type="url"]:focus {
+      border-color: #6366f1;
+    }
+
+    input[type="url"]::placeholder {
+      color: #475569;
+    }
+
+    button {
+      padding: 0.65rem 1.4rem;
+      background: #6366f1;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s, opacity 0.15s;
+      white-space: nowrap;
+    }
+
+    button:hover:not(:disabled) {
+      background: #4f52d6;
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .status {
+      margin-top: 1.2rem;
+      min-height: 1.4rem;
+      font-size: 0.88rem;
+      color: #94a3b8;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .spinner {
+      display: none;
+      width: 14px;
+      height: 14px;
+      border: 2px solid #475569;
+      border-top-color: #6366f1;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+
+    .spinner.visible { display: inline-block; }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .error { color: #f87171; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="logo">🦍</div>
+    <h1>Ape Eye</h1>
+    <p class="subtitle">輸入網址，取得全頁截圖</p>
+
+    <label for="url-input">網址</label>
+    <div class="input-row">
+      <input
+        id="url-input"
+        type="url"
+        placeholder="https://example.com"
+        autocomplete="off"
+        spellcheck="false"
+      />
+      <button id="submit-btn" type="button">截圖</button>
+    </div>
+
+    <div class="status" id="status">
+      <span class="spinner" id="spinner"></span>
+      <span id="status-text"></span>
+    </div>
+  </div>
+
+  <script>
+    const input = document.getElementById('url-input');
+    const btn = document.getElementById('submit-btn');
+    const spinner = document.getElementById('spinner');
+    const statusText = document.getElementById('status-text');
+
+    function setLoading(on) {
+      btn.disabled = on;
+      input.disabled = on;
+      spinner.classList.toggle('visible', on);
+      statusText.className = '';
+      statusText.textContent = on ? '截圖中，請稍候…' : '';
+    }
+
+    function setError(msg) {
+      spinner.classList.remove('visible');
+      statusText.className = 'error';
+      statusText.textContent = msg;
+      btn.disabled = false;
+      input.disabled = false;
+    }
+
+    btn.addEventListener('click', () => {
+      const raw = input.value.trim();
+      if (!raw) {
+        setError('請輸入網址');
+        return;
+      }
+
+      let url;
+      try {
+        url = new URL(raw);
+        if (!['http:', 'https:'].includes(url.protocol)) throw new Error();
+      } catch {
+        setError('請輸入有效的 http/https 網址');
+        return;
+      }
+
+      setLoading(true);
+      window.location.href = '/screenshot?url=' + encodeURIComponent(url.href);
+    });
+
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') btn.click();
+    });
+  </script>
+</body>
+</html>

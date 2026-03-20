@@ -1,5 +1,12 @@
 {
   "projects": {
     "default": "smai-mxinfra-251128"
+  },
+  "targets": {
+    "smai-mxinfra-251128": {
+      "hosting": {
+        "ape-eye": ["ape-eye"]
+      }
+    }
   }
 }

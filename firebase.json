@@ -1,4 +1,11 @@
 {
+  "hosting": {
+    "target": "ape-eye",
+    "public": "public",
+    "rewrites": [
+      { "source": "/screenshot", "function": "screenshot" }
+    ]
+  },
   "functions": {
     "source": "functions",
     "runtime": "nodejs20"
@@ -7,6 +14,9 @@
     "rules": "storage.rules"
   },
   "emulators": {
+    "hosting": {
+      "port": 5000
+    },
     "functions": {
       "port": 5001
     },
